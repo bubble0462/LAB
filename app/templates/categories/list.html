@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-toolbar">
+        <div class="summary-row">
+            <span>共 {{ categories|length }} 个分类</span>
+        </div>
+        <a href="{{ request.url_for('category_new') }}" class="btn btn-primary">新增分类</a>
+    </div>
+
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>分类名称</th>
+                    <th>说明</th>
+                    <th>器件数量</th>
+                    <th class="actions-col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if categories %}
+                    {% for row in categories %}
+                        <tr>
+                            <td>{{ row.category.name }}</td>
+                            <td>{{ row.category.description or "-" }}</td>
+                            <td>{{ row.item_count }}</td>
+                            <td class="actions-cell">
+                                <a href="{{ request.url_for('category_edit_page', category_id=row.category.id) }}" class="btn btn-light btn-small">编辑</a>
+                                <form method="post" action="{{ request.url_for('category_delete', category_id=row.category.id) }}" onsubmit="return confirm('确认删除该分类吗？');">
+                                    <button type="submit" class="btn btn-danger btn-small" {% if row.item_count > 0 %}disabled title="该分类下仍有器件，不能删除"{% endif %}>删除</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="empty-cell">还没有分类，请先新增分类。</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+

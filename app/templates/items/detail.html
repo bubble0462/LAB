@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-toolbar">
+        <div class="toolbar-actions">
+            <a href="{{ request.url_for('item_list') }}" class="btn btn-light">返回列表</a>
+            <a href="{{ request.url_for('item_edit_page', item_id=item.id) }}" class="btn btn-primary">编辑器件</a>
+            <form method="post" action="{{ request.url_for('item_delete', item_id=item.id) }}" onsubmit="return confirm('确认删除该器件吗？');">
+                <button type="submit" class="btn btn-danger">删除器件</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-card">
+            <h3>基础信息</h3>
+            <dl class="detail-list">
+                <div><dt>名称</dt><dd>{{ item.name }}</dd></div>
+                <div><dt>型号</dt><dd>{{ item.model }}</dd></div>
+                <div><dt>类别</dt><dd>{{ item.category.name }}</dd></div>
+                <div><dt>数量</dt><dd><span class="quantity-badge">{{ item.quantity }}</span></dd></div>
+                <div><dt>存放位置</dt><dd>{{ item.location or "-" }}</dd></div>
+            </dl>
+        </div>
+
+        <div class="detail-card">
+            <h3>详细描述</h3>
+            <dl class="detail-list detail-list-block">
+                <div><dt>关键指标</dt><dd>{{ item.key_specifications or "暂无" }}</dd></div>
+                <div><dt>功能</dt><dd>{{ item.function_description or "暂无" }}</dd></div>
+                <div><dt>备注</dt><dd>{{ item.remarks or "暂无" }}</dd></div>
+            </dl>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

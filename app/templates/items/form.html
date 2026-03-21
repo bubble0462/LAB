@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+    {% if not categories %}
+        <div class="alert alert-warning">
+            当前还没有任何分类，请先去
+            <a href="{{ request.url_for('category_new') }}">新增分类</a>
+            ，再回来录入器件。
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ form_action }}" class="edit-form">
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="name">名称 <span class="required">*</span></label>
+                <input id="name" type="text" name="name" value="{{ form_data.name }}" required>
+            </div>
+
+            <div class="form-field">
+                <label for="model">型号 <span class="required">*</span></label>
+                <input id="model" type="text" name="model" value="{{ form_data.model }}" required>
+            </div>
+
+            <div class="form-field">
+                <label for="category_id">类别 <span class="required">*</span></label>
+                <select id="category_id" name="category_id" required>
+                    <option value="">请选择类别</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if (form_data.category_id or 0) | int == category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="quantity">数量 <span class="required">*</span></label>
+                <input id="quantity" type="number" min="0" name="quantity" value="{{ form_data.quantity }}" required>
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="location">存放位置</label>
+                <input id="location" type="text" name="location" value="{{ form_data.location }}" placeholder="例如：A柜-第2层-传感器盒">
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="key_specifications">关键指标</label>
+                <textarea id="key_specifications" name="key_specifications" rows="4" placeholder="填写关键参数、工作范围、接口等">{{ form_data.key_specifications }}</textarea>
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="function_description">功能</label>
+                <textarea id="function_description" name="function_description" rows="4" placeholder="填写该器件主要用途与适用实验">{{ form_data.function_description }}</textarea>
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="remarks">备注</label>
+                <textarea id="remarks" name="remarks" rows="4" placeholder="填写使用提醒、特殊状态或维护说明">{{ form_data.remarks }}</textarea>
+            </div>
+        </div>
+
+        <div class="toolbar-actions">
+            <a href="{{ request.url_for('item_list') }}" class="btn btn-light">取消</a>
+            <button type="submit" class="btn btn-primary" {% if not categories %}disabled{% endif %}>{{ submit_label }}</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

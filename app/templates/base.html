@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or app_title }}</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">LAB</div>
+                <div>
+                    <h1>{{ app_title }}</h1>
+                    <p>局域网共享管理</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="{{ request.url_for('item_list') }}" class="{% if section == 'items' %}active{% endif %}">器件列表</a>
+                <a href="{{ request.url_for('category_list') }}" class="{% if section == 'categories' %}active{% endif %}">分类管理</a>
+            </nav>
+            <div class="sidebar-note">
+                <p>首页默认进入器件列表，所有修改会实时写入同一数据库。</p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="page-header">
+                <div>
+                    <h2>{{ page_heading or title }}</h2>
+                    <p>{{ page_description or "适合实验室内部统一管理与共享查看。" }}</p>
+                </div>
+            </header>
+
+            {% include "partials/messages.html" %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
+
