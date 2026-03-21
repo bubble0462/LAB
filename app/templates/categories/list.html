@@ -1,47 +1,79 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="panel">
-    <div class="panel-toolbar">
-        <div class="summary-row">
-            <span>共 {{ categories|length }} 个分类</span>
+<section class="hero-card">
+    <div class="hero-main">
+        <span class="eyebrow">目录维护</span>
+        <h2>分类管理</h2>
+        <p>分类是器件检索和归档的基础，保持命名稳定有助于后续继续扩展字段和页面。</p>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-card">
+            <span>分类总数</span>
+            <strong>{{ categories|length }}</strong>
+            <small>支持持续增加</small>
         </div>
-        <a href="{{ request.url_for('category_new') }}" class="btn btn-primary">新增分类</a>
+    </div>
+</section>
+
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>分类目录</h3>
+            <p>删除前会检查是否仍有关联器件，避免目录失去约束。</p>
+        </div>
+        <div class="toolbar-actions">
+            <a href="{{ request.url_for('category_new') }}" class="btn btn-primary">新增分类</a>
+        </div>
     </div>
 
-    <div class="table-wrap">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>分类名称</th>
-                    <th>说明</th>
-                    <th>器件数量</th>
-                    <th class="actions-col">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if categories %}
+    {% if categories %}
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>分类名称</th>
+                        <th>说明</th>
+                        <th>器件数量</th>
+                        <th class="actions-col">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for row in categories %}
                         <tr>
-                            <td>{{ row.category.name }}</td>
-                            <td>{{ row.category.description or "-" }}</td>
-                            <td>{{ row.item_count }}</td>
+                            <td>
+                                <div class="entity-block">
+                                    <div class="entity-name">{{ row.category.name }}</div>
+                                    <div class="entity-meta">分类 ID {{ row.category.id }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stacked-text">
+                                    <strong>{{ row.category.description or "暂无分类说明" }}</strong>
+                                    <span>{% if row.item_count > 0 %}当前已有 {{ row.item_count }} 条器件记录归类于此{% else %}当前尚未绑定器件，可继续扩展使用{% endif %}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="quantity-badge">{{ row.item_count }}</span>
+                            </td>
                             <td class="actions-cell">
-                                <a href="{{ request.url_for('category_edit_page', category_id=row.category.id) }}" class="btn btn-light btn-small">编辑</a>
+                                <a href="{{ request.url_for('category_edit_page', category_id=row.category.id) }}" class="btn btn-secondary btn-small">编辑</a>
                                 <form method="post" action="{{ request.url_for('category_delete', category_id=row.category.id) }}" onsubmit="return confirm('确认删除该分类吗？');">
-                                    <button type="submit" class="btn btn-danger btn-small" {% if row.item_count > 0 %}disabled title="该分类下仍有器件，不能删除"{% endif %}>删除</button>
+                                    <button type="submit" class="btn btn-danger-soft btn-small" {% if row.item_count > 0 %}disabled title="该分类下仍有器件，不能删除"{% endif %}>删除</button>
                                 </form>
                             </td>
                         </tr>
                     {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="empty-cell">还没有分类，请先新增分类。</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-mark">CAT</div>
+            <h3>还没有任何分类</h3>
+            <p>建议先建立稳定的分类目录，再开始批量维护器件信息。</p>
+            <a href="{{ request.url_for('category_new') }}" class="btn btn-primary">新增分类</a>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}
-

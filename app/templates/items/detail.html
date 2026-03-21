@@ -1,38 +1,101 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="panel">
-    <div class="panel-toolbar">
-        <div class="toolbar-actions">
-            <a href="{{ request.url_for('item_list') }}" class="btn btn-light">返回列表</a>
+<section class="hero-card hero-card-detail">
+    <div class="hero-main">
+        <span class="eyebrow">器件详情</span>
+        <h2>{{ item.name }}</h2>
+        <p>{{ item.function_description or "查看该器件的完整信息，确保型号、数量和库位描述与实际情况保持一致。" }}</p>
+        <div class="filter-summary">
+            <span class="tag tag-accent">{{ item.category.name }}</span>
+            <span class="tag tag-muted">型号：{{ item.model }}</span>
+            <span class="tag tag-muted">库位：{{ item.location or "未填写" }}</span>
+        </div>
+    </div>
+    <div class="hero-side">
+        <div class="stat-card stat-card-focus">
+            <span>当前数量</span>
+            <strong>{{ item.quantity }}</strong>
+            <small>请与实际库存保持同步</small>
+        </div>
+        <div class="action-cluster action-cluster-vertical">
+            <a href="{{ request.url_for('item_list') }}" class="btn btn-secondary">返回列表</a>
             <a href="{{ request.url_for('item_edit_page', item_id=item.id) }}" class="btn btn-primary">编辑器件</a>
             <form method="post" action="{{ request.url_for('item_delete', item_id=item.id) }}" onsubmit="return confirm('确认删除该器件吗？');">
-                <button type="submit" class="btn btn-danger">删除器件</button>
+                <button type="submit" class="btn btn-danger-soft">删除器件</button>
             </form>
         </div>
     </div>
-
-    <div class="detail-grid">
-        <div class="detail-card">
-            <h3>基础信息</h3>
-            <dl class="detail-list">
-                <div><dt>名称</dt><dd>{{ item.name }}</dd></div>
-                <div><dt>型号</dt><dd>{{ item.model }}</dd></div>
-                <div><dt>类别</dt><dd>{{ item.category.name }}</dd></div>
-                <div><dt>数量</dt><dd><span class="quantity-badge">{{ item.quantity }}</span></dd></div>
-                <div><dt>存放位置</dt><dd>{{ item.location or "-" }}</dd></div>
-            </dl>
-        </div>
-
-        <div class="detail-card">
-            <h3>详细描述</h3>
-            <dl class="detail-list detail-list-block">
-                <div><dt>关键指标</dt><dd>{{ item.key_specifications or "暂无" }}</dd></div>
-                <div><dt>功能</dt><dd>{{ item.function_description or "暂无" }}</dd></div>
-                <div><dt>备注</dt><dd>{{ item.remarks or "暂无" }}</dd></div>
-            </dl>
-        </div>
-    </div>
 </section>
-{% endblock %}
 
+<div class="detail-layout">
+    <section class="surface">
+        <div class="surface-header">
+            <div>
+                <h3>基础信息</h3>
+                <p>用于快速确认器件身份、归属分类和存放位置。</p>
+            </div>
+        </div>
+
+        <dl class="detail-pairs">
+            <div>
+                <dt>名称</dt>
+                <dd>{{ item.name }}</dd>
+            </div>
+            <div>
+                <dt>型号</dt>
+                <dd>{{ item.model }}</dd>
+            </div>
+            <div>
+                <dt>类别</dt>
+                <dd>{{ item.category.name }}</dd>
+            </div>
+            <div>
+                <dt>存放位置</dt>
+                <dd>{{ item.location or "未填写" }}</dd>
+            </div>
+            <div>
+                <dt>创建时间</dt>
+                <dd>{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</dd>
+            </div>
+            <div>
+                <dt>最后更新</dt>
+                <dd>{{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="surface">
+        <div class="surface-header">
+            <div>
+                <h3>技术与用途</h3>
+                <p>适合认真查看参数与功能说明，也便于后续补充更多字段。</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <span class="content-label">关键指标</span>
+            <p>{{ item.key_specifications or "暂无关键指标说明" }}</p>
+        </div>
+
+        <div class="content-block">
+            <span class="content-label">功能</span>
+            <p>{{ item.function_description or "暂无功能说明" }}</p>
+        </div>
+    </section>
+
+    <section class="surface surface-full">
+        <div class="surface-header">
+            <div>
+                <h3>备注与维护提醒</h3>
+                <p>记录使用提示、特殊状态、维护信息或其他需要长期保留的说明。</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <span class="content-label">备注</span>
+            <p>{{ item.remarks or "暂无备注信息" }}</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

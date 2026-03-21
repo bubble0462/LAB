@@ -1,84 +1,170 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="panel">
-    <div class="panel-toolbar">
-        <form method="get" action="{{ request.url_for('item_list') }}" class="search-form">
-            <div class="form-field">
-                <label for="q">关键词搜索</label>
-                <input id="q" type="text" name="q" value="{{ search_keyword }}" placeholder="按名称、型号、类别、功能搜索">
-            </div>
-            <div class="form-field">
-                <label for="category_id">类别筛选</label>
-                <select id="category_id" name="category_id">
-                    <option value="">全部类别</option>
+<section class="hero-card">
+    <div class="hero-main">
+        <span class="eyebrow">核心工作台</span>
+        <h2>器件列表</h2>
+        <p>统一查看实验室现有器件，保持搜索、筛选、查看和维护的路径足够直接。</p>
+        {% if search_keyword or selected_category_id %}
+            <div class="filter-summary">
+                {% if search_keyword %}
+                    <span class="tag tag-muted">关键词：{{ search_keyword }}</span>
+                {% endif %}
+                {% if selected_category_id %}
                     {% for category in categories %}
-                        <option value="{{ category.id }}" {% if selected_category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% if category.id == selected_category_id %}
+                            <span class="tag tag-accent">类别：{{ category.name }}</span>
+                        {% endif %}
                     {% endfor %}
-                </select>
+                {% endif %}
             </div>
-            <div class="toolbar-actions">
-                <button type="submit" class="btn btn-primary">搜索</button>
-                <a href="{{ request.url_for('item_list') }}" class="btn btn-light">重置</a>
-            </div>
-        </form>
+        {% endif %}
+    </div>
+    <div class="hero-stats">
+        <div class="stat-card">
+            <span>筛选结果</span>
+            <strong>{{ pagination.total }}</strong>
+            <small>当前可见器件</small>
+        </div>
+        <div class="stat-card">
+            <span>分类数量</span>
+            <strong>{{ categories|length }}</strong>
+            <small>支持持续扩展</small>
+        </div>
+        <div class="stat-card">
+            <span>页码位置</span>
+            <strong>{{ pagination.page }}/{{ pagination.total_pages }}</strong>
+            <small>每页 {{ pagination.page_size }} 条</small>
+        </div>
+    </div>
+</section>
 
-        <a href="{{ request.url_for('item_new') }}" class="btn btn-primary">新增器件</a>
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>搜索与筛选</h3>
+            <p>优先保留常用检索动作，减少查找路径和视觉干扰。</p>
+        </div>
+        <div class="toolbar-actions">
+            <a href="{{ request.url_for('item_new') }}" class="btn btn-primary">新增器件</a>
+        </div>
     </div>
 
-    <div class="summary-row">
-        <span>共 {{ pagination.total }} 条器件记录</span>
-        <span>当前第 {{ pagination.page }} / {{ pagination.total_pages }} 页</span>
+    <form method="get" action="{{ request.url_for('item_list') }}" class="filter-grid">
+        <div class="form-field">
+            <label for="q">关键词搜索</label>
+            <input id="q" type="text" name="q" value="{{ search_keyword }}" placeholder="按名称、型号、类别、功能搜索">
+            <p class="field-hint">支持模糊检索，适合快速定位已有器件。</p>
+        </div>
+
+        <div class="form-field">
+            <label for="category_id">类别筛选</label>
+            <select id="category_id" name="category_id">
+                <option value="">全部类别</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <p class="field-hint">先按类别收敛范围，再查看详情会更高效。</p>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">执行筛选</button>
+            <a href="{{ request.url_for('item_list') }}" class="btn btn-secondary">清空条件</a>
+        </div>
+    </form>
+</section>
+
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>器件清单</h3>
+            <p>按最近更新时间排序，优先展示识别信息、分类、数量和关键说明。</p>
+        </div>
+        <div class="meta-inline">
+            <span>共 {{ pagination.total }} 条记录</span>
+            <span>第 {{ pagination.page }} 页</span>
+        </div>
     </div>
 
-    <div class="table-wrap">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>名称</th>
-                    <th>型号</th>
-                    <th>类别</th>
-                    <th>数量</th>
-                    <th>存放位置</th>
-                    <th>功能</th>
-                    <th class="actions-col">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if items %}
+    {% if items %}
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>器件名称</th>
+                        <th>型号与指标</th>
+                        <th>类别</th>
+                        <th>数量</th>
+                        <th>存放位置</th>
+                        <th>功能与备注</th>
+                        <th class="actions-col">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for item in items %}
                         <tr>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.model }}</td>
-                            <td>{{ item.category.name }}</td>
-                            <td><span class="quantity-badge">{{ item.quantity }}</span></td>
-                            <td>{{ item.location or "-" }}</td>
-                            <td>{{ (item.function_description or "-") | truncate(36, True, "...") }}</td>
+                            <td>
+                                <div class="entity-block">
+                                    <div class="entity-name">{{ item.name }}</div>
+                                    <div class="entity-meta">记录 ID {{ item.id }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stacked-text">
+                                    <strong>{{ item.model }}</strong>
+                                    <span>{{ (item.key_specifications or "未补充关键指标") | truncate(40, True, "...") }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="tag tag-outline">{{ item.category.name }}</span>
+                            </td>
+                            <td>
+                                <span class="quantity-badge">{{ item.quantity }}</span>
+                            </td>
+                            <td>
+                                <div class="stacked-text">
+                                    <strong>{{ item.location or "未填写" }}</strong>
+                                    <span>建议保持库位描述清晰一致</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stacked-text">
+                                    <strong>{{ (item.function_description or "未补充功能说明") | truncate(42, True, "...") }}</strong>
+                                    <span>{{ (item.remarks or "暂无备注") | truncate(34, True, "...") }}</span>
+                                </div>
+                            </td>
                             <td class="actions-cell">
-                                <a href="{{ request.url_for('item_detail', item_id=item.id) }}" class="btn btn-light btn-small">查看</a>
-                                <a href="{{ request.url_for('item_edit_page', item_id=item.id) }}" class="btn btn-light btn-small">编辑</a>
+                                <a href="{{ request.url_for('item_detail', item_id=item.id) }}" class="btn btn-secondary btn-small">查看</a>
+                                <a href="{{ request.url_for('item_edit_page', item_id=item.id) }}" class="btn btn-secondary btn-small">编辑</a>
                                 <form method="post" action="{{ request.url_for('item_delete', item_id=item.id) }}" onsubmit="return confirm('确认删除该器件吗？');">
-                                    <button type="submit" class="btn btn-danger btn-small">删除</button>
+                                    <button type="submit" class="btn btn-danger-soft btn-small">删除</button>
                                 </form>
                             </td>
                         </tr>
                     {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="7" class="empty-cell">暂无符合条件的器件记录。</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
 
-    <div class="pagination">
-        <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page=1{% if filter_query %}&{{ filter_query }}{% endif %}">首页</a>
-        <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page={{ pagination.page - 1 if pagination.page > 1 else 1 }}{% if filter_query %}&{{ filter_query }}{% endif %}">上一页</a>
-        <span class="page-status">第 {{ pagination.page }} / {{ pagination.total_pages }} 页</span>
-        <a class="page-link {% if pagination.page >= pagination.total_pages %}disabled{% endif %}" href="?page={{ pagination.page + 1 if pagination.page < pagination.total_pages else pagination.total_pages }}{% if filter_query %}&{{ filter_query }}{% endif %}">下一页</a>
-        <a class="page-link {% if pagination.page >= pagination.total_pages %}disabled{% endif %}" href="?page={{ pagination.total_pages }}{% if filter_query %}&{{ filter_query }}{% endif %}">末页</a>
-    </div>
+        <div class="pagination-bar">
+            <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page=1{% if filter_query %}&{{ filter_query }}{% endif %}">首页</a>
+            <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page={{ pagination.page - 1 if pagination.page > 1 else 1 }}{% if filter_query %}&{{ filter_query }}{% endif %}">上一页</a>
+            <span class="page-status">第 {{ pagination.page }} / {{ pagination.total_pages }} 页</span>
+            <a class="page-link {% if pagination.page >= pagination.total_pages %}disabled{% endif %}" href="?page={{ pagination.page + 1 if pagination.page < pagination.total_pages else pagination.total_pages }}{% if filter_query %}&{{ filter_query }}{% endif %}">下一页</a>
+            <a class="page-link {% if pagination.page >= pagination.total_pages %}disabled{% endif %}" href="?page={{ pagination.total_pages }}{% if filter_query %}&{{ filter_query }}{% endif %}">末页</a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-mark">LAB</div>
+            <h3>当前没有符合条件的器件记录</h3>
+            <p>你可以先放宽筛选条件，或者直接新增一条器件记录。</p>
+            <div class="toolbar-actions">
+                <a href="{{ request.url_for('item_list') }}" class="btn btn-secondary">查看全部</a>
+                <a href="{{ request.url_for('item_new') }}" class="btn btn-primary">新增器件</a>
+            </div>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}
-

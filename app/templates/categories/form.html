@@ -1,25 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="panel">
-    <form method="post" action="{{ form_action }}" class="edit-form">
-        <div class="form-grid">
-            <div class="form-field form-field-wide">
-                <label for="name">分类名称 <span class="required">*</span></label>
-                <input id="name" type="text" name="name" value="{{ form_data.name }}" required>
-            </div>
+<section class="hero-card">
+    <div class="hero-main">
+        <span class="eyebrow">分类表单</span>
+        <h2>{{ page_heading }}</h2>
+        <p>分类结构越清晰，后续器件录入和列表筛选就越顺手。</p>
+    </div>
+    <div class="hero-side">
+        <div class="stat-card">
+            <span>维护建议</span>
+            <strong>名称稳定、说明明确</strong>
+            <small>避免后续出现重复或语义接近的分类</small>
+        </div>
+    </div>
+</section>
 
-            <div class="form-field form-field-wide">
-                <label for="description">分类说明</label>
-                <textarea id="description" name="description" rows="5" placeholder="可填写该分类适用范围、常见器件类型等">{{ form_data.description }}</textarea>
-            </div>
+<form method="post" action="{{ form_action }}" class="form-layout">
+    <div class="form-layout-grid">
+        <div class="form-main">
+            <section class="surface">
+                <div class="surface-header">
+                    <div>
+                        <h3>分类信息</h3>
+                        <p>分类将直接影响器件列表的筛选体验和长期可维护性。</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-field form-field-wide">
+                        <label for="name">分类名称 <span class="required">*</span></label>
+                        <input id="name" type="text" name="name" value="{{ form_data.name }}" required>
+                        <p class="field-hint">建议使用稳定、简短、可复用的命名方式。</p>
+                    </div>
+
+                    <div class="form-field form-field-wide">
+                        <label for="description">分类说明</label>
+                        <textarea id="description" name="description" rows="5" placeholder="可填写该分类适用范围、常见器件类型等">{{ form_data.description }}</textarea>
+                        <p class="field-hint">说明可帮助后续成员判断应该把器件归入哪个分类。</p>
+                    </div>
+                </div>
+            </section>
         </div>
 
+        <aside class="form-sidebar">
+            <section class="surface note-card">
+                <div class="surface-header">
+                    <div>
+                        <h3>命名建议</h3>
+                        <p>避免目录膨胀和含义重叠。</p>
+                    </div>
+                </div>
+
+                <ul class="note-list">
+                    <li>优先用类别词，不要用具体器件名代替分类。</li>
+                    <li>如果两个分类含义接近，建议合并成更稳定的上位概念。</li>
+                    <li>描述里可写常见器件范围，方便后续继续扩展。</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+
+    <section class="surface action-strip">
+        <div>
+            <h3>保存分类</h3>
+            <p>确认名称不会与现有分类重复，再提交保存。</p>
+        </div>
         <div class="toolbar-actions">
-            <a href="{{ request.url_for('category_list') }}" class="btn btn-light">取消</a>
+            <a href="{{ request.url_for('category_list') }}" class="btn btn-secondary">取消</a>
             <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
         </div>
-    </form>
-</section>
+    </section>
+</form>
 {% endblock %}
-

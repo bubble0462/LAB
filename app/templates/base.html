@@ -7,37 +7,57 @@
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
 <body>
-    <div class="layout">
+    {% set section_name = "器件管理" if section == "items" else "分类目录" if section == "categories" else "实验室内部系统" %}
+
+    <div class="app-shell">
         <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-mark">LAB</div>
-                <div>
-                    <h1>{{ app_title }}</h1>
-                    <p>局域网共享管理</p>
+            <div class="sidebar-inner">
+                <div class="brand">
+                    <div class="brand-mark">LAB</div>
+                    <div class="brand-copy">
+                        <span class="brand-kicker">Inventory Console</span>
+                        <h1>{{ app_title }}</h1>
+                        <p>面向实验室内部共享与长期维护的器件信息系统</p>
+                    </div>
                 </div>
-            </div>
-            <nav class="nav">
-                <a href="{{ request.url_for('item_list') }}" class="{% if section == 'items' %}active{% endif %}">器件列表</a>
-                <a href="{{ request.url_for('category_list') }}" class="{% if section == 'categories' %}active{% endif %}">分类管理</a>
-            </nav>
-            <div class="sidebar-note">
-                <p>首页默认进入器件列表，所有修改会实时写入同一数据库。</p>
+
+                <nav class="nav">
+                    <a href="{{ request.url_for('item_list') }}" class="{% if section == 'items' %}active{% endif %}">
+                        <span class="nav-label">器件列表</span>
+                        <span class="nav-meta">核心工作台</span>
+                    </a>
+                    <a href="{{ request.url_for('category_list') }}" class="{% if section == 'categories' %}active{% endif %}">
+                        <span class="nav-label">分类管理</span>
+                        <span class="nav-meta">扩展目录</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-panel">
+                    <p class="sidebar-panel-title">系统状态</p>
+                    <ul class="sidebar-list">
+                        <li>局域网内共享同一份数据</li>
+                        <li>修改后即时可见</li>
+                        <li>默认使用 SQLite 持久化</li>
+                    </ul>
+                </div>
             </div>
         </aside>
 
-        <main class="content">
-            <header class="page-header">
-                <div>
-                    <h2>{{ page_heading or title }}</h2>
-                    <p>{{ page_description or "适合实验室内部统一管理与共享查看。" }}</p>
+        <main class="workspace">
+            <header class="workspace-topbar">
+                <div class="workspace-copy">
+                    <span class="workspace-kicker">{{ section_name }}</span>
+                    <p>保持信息层级清晰、操作顺手、页面长期可维护。</p>
                 </div>
+                <div class="workspace-pill">局域网共享 / 数据实时写入</div>
             </header>
 
             {% include "partials/messages.html" %}
 
-            {% block content %}{% endblock %}
+            <div class="page-stack">
+                {% block content %}{% endblock %}
+            </div>
         </main>
     </div>
 </body>
 </html>
-

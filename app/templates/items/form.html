@@ -1,67 +1,142 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="panel">
-    {% if not categories %}
-        <div class="alert alert-warning">
-            当前还没有任何分类，请先去
-            <a href="{{ request.url_for('category_new') }}">新增分类</a>
-            ，再回来录入器件。
+<section class="hero-card">
+    <div class="hero-main">
+        <span class="eyebrow">器件表单</span>
+        <h2>{{ page_heading }}</h2>
+        <p>保持字段信息清晰完整，可以显著提升后续搜索、筛选和共享维护的效率。</p>
+    </div>
+    <div class="hero-side">
+        <div class="stat-card">
+            <span>填写重点</span>
+            <strong>名称 / 型号 / 类别 / 数量</strong>
+            <small>其余字段建议按实际情况尽量补全</small>
         </div>
-    {% endif %}
+    </div>
+</section>
 
-    <form method="post" action="{{ form_action }}" class="edit-form">
-        <div class="form-grid">
-            <div class="form-field">
-                <label for="name">名称 <span class="required">*</span></label>
-                <input id="name" type="text" name="name" value="{{ form_data.name }}" required>
-            </div>
+{% if not categories %}
+    <div class="alert alert-warning">
+        当前还没有任何分类，请先去 <a href="{{ request.url_for('category_new') }}">新增分类</a>，再回来录入器件。
+    </div>
+{% endif %}
 
-            <div class="form-field">
-                <label for="model">型号 <span class="required">*</span></label>
-                <input id="model" type="text" name="model" value="{{ form_data.model }}" required>
-            </div>
+<form method="post" action="{{ form_action }}" class="form-layout">
+    <div class="form-layout-grid">
+        <div class="form-main">
+            <section class="surface">
+                <div class="surface-header">
+                    <div>
+                        <h3>基础资料</h3>
+                        <p>这部分信息会直接影响列表检索、归类和日常查找效率。</p>
+                    </div>
+                </div>
 
-            <div class="form-field">
-                <label for="category_id">类别 <span class="required">*</span></label>
-                <select id="category_id" name="category_id" required>
-                    <option value="">请选择类别</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}" {% if (form_data.category_id or 0) | int == category.id %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="name">名称 <span class="required">*</span></label>
+                        <input id="name" type="text" name="name" value="{{ form_data.name }}" required>
+                        <p class="field-hint">建议填写实验室内部最常用的器件名称。</p>
+                    </div>
 
-            <div class="form-field">
-                <label for="quantity">数量 <span class="required">*</span></label>
-                <input id="quantity" type="number" min="0" name="quantity" value="{{ form_data.quantity }}" required>
-            </div>
+                    <div class="form-field">
+                        <label for="model">型号 <span class="required">*</span></label>
+                        <input id="model" type="text" name="model" value="{{ form_data.model }}" required>
+                        <p class="field-hint">型号越准确，后续检索和复用越方便。</p>
+                    </div>
 
-            <div class="form-field form-field-wide">
-                <label for="location">存放位置</label>
-                <input id="location" type="text" name="location" value="{{ form_data.location }}" placeholder="例如：A柜-第2层-传感器盒">
-            </div>
+                    <div class="form-field">
+                        <label for="category_id">类别 <span class="required">*</span></label>
+                        <select id="category_id" name="category_id" required>
+                            <option value="">请选择类别</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if (form_data.category_id or 0) | int == category.id %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="field-hint">优先选择合适分类，避免后续维护时重复创建。</p>
+                    </div>
 
-            <div class="form-field form-field-wide">
-                <label for="key_specifications">关键指标</label>
-                <textarea id="key_specifications" name="key_specifications" rows="4" placeholder="填写关键参数、工作范围、接口等">{{ form_data.key_specifications }}</textarea>
-            </div>
+                    <div class="form-field">
+                        <label for="quantity">数量 <span class="required">*</span></label>
+                        <input id="quantity" type="number" min="0" name="quantity" value="{{ form_data.quantity }}" required>
+                        <p class="field-hint">请与当前实际库存一致，便于内部共享查看。</p>
+                    </div>
 
-            <div class="form-field form-field-wide">
-                <label for="function_description">功能</label>
-                <textarea id="function_description" name="function_description" rows="4" placeholder="填写该器件主要用途与适用实验">{{ form_data.function_description }}</textarea>
-            </div>
+                    <div class="form-field form-field-wide">
+                        <label for="location">存放位置</label>
+                        <input id="location" type="text" name="location" value="{{ form_data.location }}" placeholder="例如：A柜-第2层-传感器盒">
+                        <p class="field-hint">建议使用统一格式记录库位，方便快速找到实物。</p>
+                    </div>
+                </div>
+            </section>
 
-            <div class="form-field form-field-wide">
-                <label for="remarks">备注</label>
-                <textarea id="remarks" name="remarks" rows="4" placeholder="填写使用提醒、特殊状态或维护说明">{{ form_data.remarks }}</textarea>
-            </div>
+            <section class="surface">
+                <div class="surface-header">
+                    <div>
+                        <h3>补充说明</h3>
+                        <p>这些内容有助于提高阅读体验，也方便后续继续扩展字段。</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-field form-field-wide">
+                        <label for="key_specifications">关键指标</label>
+                        <textarea id="key_specifications" name="key_specifications" rows="4" placeholder="填写关键参数、工作范围、接口等">{{ form_data.key_specifications }}</textarea>
+                        <p class="field-hint">例如工作电压、量程、接口类型、核心芯片等。</p>
+                    </div>
+
+                    <div class="form-field form-field-wide">
+                        <label for="function_description">功能</label>
+                        <textarea id="function_description" name="function_description" rows="4" placeholder="填写该器件主要用途与适用实验">{{ form_data.function_description }}</textarea>
+                        <p class="field-hint">适合描述用途、适用实验或常见使用场景。</p>
+                    </div>
+
+                    <div class="form-field form-field-wide">
+                        <label for="remarks">备注</label>
+                        <textarea id="remarks" name="remarks" rows="4" placeholder="填写使用提醒、特殊状态或维护说明">{{ form_data.remarks }}</textarea>
+                        <p class="field-hint">可记录注意事项、配件情况、特殊状态等信息。</p>
+                    </div>
+                </div>
+            </section>
         </div>
 
+        <aside class="form-sidebar">
+            <section class="surface note-card">
+                <div class="surface-header">
+                    <div>
+                        <h3>录入建议</h3>
+                        <p>保持命名规则一致，会让系统更耐用。</p>
+                    </div>
+                </div>
+
+                <ul class="note-list">
+                    <li>名称尽量使用实验室内部统一叫法。</li>
+                    <li>型号建议填写完整，避免后续重复录入。</li>
+                    <li>存放位置建议采用固定格式，方便线下查找。</li>
+                    <li>关键指标和功能说明越清晰，后续协作越顺畅。</li>
+                </ul>
+
+                {% if item %}
+                    <div class="mini-info">
+                        <span>当前记录</span>
+                        <strong>{{ item.name }}</strong>
+                        <small>最近更新：{{ item.updated_at.strftime("%Y-%m-%d %H:%M") }}</small>
+                    </div>
+                {% endif %}
+            </section>
+        </aside>
+    </div>
+
+    <section class="surface action-strip">
+        <div>
+            <h3>保存前确认</h3>
+            <p>建议至少确认名称、型号、分类、数量和库位信息是否准确。</p>
+        </div>
         <div class="toolbar-actions">
-            <a href="{{ request.url_for('item_list') }}" class="btn btn-light">取消</a>
+            <a href="{{ request.url_for('item_list') }}" class="btn btn-secondary">取消</a>
             <button type="submit" class="btn btn-primary" {% if not categories %}disabled{% endif %}>{{ submit_label }}</button>
         </div>
-    </form>
-</section>
+    </section>
+</form>
 {% endblock %}
