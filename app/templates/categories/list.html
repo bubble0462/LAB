@@ -29,7 +29,7 @@
 
     {% if categories %}
         <div class="table-wrap">
-            <table class="data-table">
+            <table class="data-table category-table">
                 <thead>
                     <tr>
                         <th>分类名称</th>
@@ -41,22 +41,30 @@
                 <tbody>
                     {% for row in categories %}
                         <tr>
-                            <td>
+                            <td class="cell-primary" data-label="分类名称">
                                 <div class="entity-block">
-                                    <div class="entity-name">{{ row.category.name }}</div>
-                                    <div class="entity-meta">分类 ID {{ row.category.id }}</div>
+                                    <div class="entity-name-row">
+                                        <div class="entity-name">{{ row.category.name }}</div>
+                                        <div class="cell-inline-tags cell-inline-tags-mobile">
+                                            <span class="quantity-badge quantity-badge-compact">{{ row.item_count }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="entity-inline-meta">
+                                        <span class="entity-meta">分类 ID {{ row.category.id }}</span>
+                                        <span class="entity-meta">最近更新 {{ row.category.updated_at.strftime("%m-%d %H:%M") }}</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="说明">
                                 <div class="stacked-text">
-                                    <strong>{{ row.category.description or "暂无分类说明" }}</strong>
-                                    <span>{% if row.item_count > 0 %}当前已有 {{ row.item_count }} 条器件记录归类于此{% else %}当前尚未绑定器件，可继续扩展使用{% endif %}</span>
+                                    <strong class="clamp-2">{{ row.category.description or "暂无分类说明" }}</strong>
+                                    <span class="clamp-2">{% if row.item_count > 0 %}当前已有 {{ row.item_count }} 条器件记录归类于此{% else %}当前尚未绑定器件，可继续扩展使用{% endif %}</span>
                                 </div>
                             </td>
-                            <td>
+                            <td class="cell-mobile-hidden" data-label="器件数量">
                                 <span class="quantity-badge">{{ row.item_count }}</span>
                             </td>
-                            <td class="actions-cell">
+                            <td class="actions-cell cell-actions" data-label="操作">
                                 <a href="{{ request.url_for('category_edit_page', category_id=row.category.id) }}" class="btn btn-secondary btn-small">编辑</a>
                                 <form method="post" action="{{ request.url_for('category_delete', category_id=row.category.id) }}" onsubmit="return confirm('确认删除该分类吗？');">
                                     <button type="submit" class="btn btn-danger-soft btn-small" {% if row.item_count > 0 %}disabled title="该分类下仍有器件，不能删除"{% endif %}>删除</button>

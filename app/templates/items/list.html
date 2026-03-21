@@ -90,7 +90,7 @@
 
     {% if items %}
         <div class="table-wrap">
-            <table class="data-table">
+            <table class="data-table inventory-table">
                 <thead>
                     <tr>
                         <th>器件名称</th>
@@ -105,37 +105,46 @@
                 <tbody>
                     {% for item in items %}
                         <tr>
-                            <td>
+                            <td class="cell-primary" data-label="器件名称">
                                 <div class="entity-block">
-                                    <div class="entity-name">{{ item.name }}</div>
-                                    <div class="entity-meta">记录 ID {{ item.id }}</div>
+                                    <div class="entity-name-row">
+                                        <div class="entity-name">{{ item.name }}</div>
+                                        <div class="cell-inline-tags cell-inline-tags-mobile">
+                                            <span class="tag tag-outline">{{ item.category.name }}</span>
+                                            <span class="quantity-badge quantity-badge-compact">{{ item.quantity }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="entity-inline-meta">
+                                        <span class="entity-meta">记录 ID {{ item.id }}</span>
+                                        <span class="entity-meta">更新于 {{ item.updated_at.strftime("%m-%d %H:%M") }}</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="型号与指标">
                                 <div class="stacked-text">
-                                    <strong>{{ item.model }}</strong>
-                                    <span>{{ (item.key_specifications or "未补充关键指标") | truncate(40, True, "...") }}</span>
+                                    <strong class="mono-text">{{ item.model }}</strong>
+                                    <span class="clamp-2">{{ item.key_specifications or "未补充关键指标" }}</span>
                                 </div>
                             </td>
-                            <td>
+                            <td class="cell-mobile-hidden" data-label="类别">
                                 <span class="tag tag-outline">{{ item.category.name }}</span>
                             </td>
-                            <td>
+                            <td class="cell-mobile-hidden" data-label="数量">
                                 <span class="quantity-badge">{{ item.quantity }}</span>
                             </td>
-                            <td>
+                            <td data-label="存放位置">
                                 <div class="stacked-text">
                                     <strong>{{ item.location or "未填写" }}</strong>
-                                    <span>建议保持库位描述清晰一致</span>
+                                    <span class="clamp-1">建议保持库位描述清晰一致</span>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="功能与备注">
                                 <div class="stacked-text">
-                                    <strong>{{ (item.function_description or "未补充功能说明") | truncate(42, True, "...") }}</strong>
-                                    <span>{{ (item.remarks or "暂无备注") | truncate(34, True, "...") }}</span>
+                                    <strong class="clamp-2">{{ item.function_description or "未补充功能说明" }}</strong>
+                                    <span class="clamp-2">{{ item.remarks or "暂无备注" }}</span>
                                 </div>
                             </td>
-                            <td class="actions-cell">
+                            <td class="actions-cell cell-actions" data-label="操作">
                                 <a href="{{ request.url_for('item_detail', item_id=item.id) }}" class="btn btn-secondary btn-small">查看</a>
                                 <a href="{{ request.url_for('item_edit_page', item_id=item.id) }}" class="btn btn-secondary btn-small">编辑</a>
                                 <form method="post" action="{{ request.url_for('item_delete', item_id=item.id) }}" onsubmit="return confirm('确认删除该器件吗？');">
