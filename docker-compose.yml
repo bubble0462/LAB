@@ -1,0 +1,14 @@
+services:
+  lab-inventory:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lab-inventory
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: change-this-before-production
+      PAGE_SIZE: "10"
+    volumes:
+      - /drv2/mysql_docker/bubble:/app/data
+    restart: unless-stopped

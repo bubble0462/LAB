@@ -1,0 +1,68 @@
+手把手部署
+以下假设你的项目要放在 Debian 的 /opt/lab-inventory。
+
+把项目传到 Debian
+mkdir -p /opt/lab-inventory
+cd /opt/lab-inventory
+把你本地整个项目目录内容复制到这里。
+
+安装 Docker 和 Compose 插件
+根据 Docker 官方 Debian 安装文档，执行：
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<'EOF'
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: bookworm
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+如果你的 Debian 不是 12 bookworm，把上面的 bookworm 改成你的版本代号。
+
+确认 Docker 正常
+sudo systemctl status docker
+sudo docker run hello-world
+创建数据目录
+sudo mkdir -p /drv2/mysql_docker/bubble
+sudo chmod 777 /drv2/mysql_docker/bubble
+先这样最省事。后面要更严谨再收权限。
+
+进入项目目录
+cd /opt/lab-inventory
+启动项目
+sudo docker compose up -d --build
+查看是否启动成功
+sudo docker compose ps
+sudo docker compose logs -f
+看到服务正常监听后，浏览器访问：
+
+http://你的Debian机器IP:8000
+以后常用命令
+启动：
+
+sudo docker compose up -d
+停止：
+
+sudo docker compose down
+重建更新：
+
+sudo docker compose up -d --build
+看日志：
+
+sudo docker compose logs -f
+备份数据库
+
+cp /drv2/mysql_docker/bubble/lab_inventory.db /drv2/mysql_docker/bubble/lab_inventory_backup_$(date +%F).db
+如果打不开
+
+先确认容器在跑：sudo docker compose ps
+再看日志：sudo docker compose logs -f
+再确认 Debian 防火墙或安全组放行了 8000
+再确认你访问的是 http://Debian机器IP:8000，不是 127.0.0.1

@@ -1,0 +1,12 @@
+.git
+.venv
+.codex
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+data/*.db
+uvicorn.log
+

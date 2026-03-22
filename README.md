@@ -24,9 +24,10 @@
 为什么这样选：
 
 - 不做前后端完全分离，部署最简单
-- 不引入 Redis、Docker、消息队列等额外复杂组件
+- 不引入 Redis、消息队列等额外复杂组件
 - 只有一个 Python 服务，后续维护和迁移都更容易
 - 数据直接落到 SQLite 文件，备份就是复制数据库文件
+- 不依赖 Docker 也能直接运行，同时已经提供 Docker 镜像部署方案
 
 ## 2. 功能说明
 
@@ -63,6 +64,9 @@ LAB/
 │  ├─ models.py               # 数据模型
 │  └─ seed.py                 # 建表与示例数据初始化
 ├─ data/                      # SQLite 数据库文件目录
+├─ .dockerignore
+├─ Dockerfile                 # Docker 镜像构建文件
+├─ docker-compose.yml         # Docker Compose 部署文件
 ├─ scripts/
 │  └─ init_db.py              # 手动初始化数据库脚本
 ├─ requirements.txt
@@ -302,6 +306,99 @@ sudo systemctl status lab-inventory
 sudo journalctl -u lab-inventory -f
 ```
 
+### 9.4 Docker 镜像方式
+
+如果你希望在 Debian 上用 Docker 部署，这个项目现在已经支持。
+
+优点：
+
+- 不需要在宿主机手动配置 Python 虚拟环境
+- 部署和迁移更标准化
+- 容器重建后，只要数据卷还在，数据库就不会丢
+
+#### 9.4.1 构建镜像
+
+在项目根目录执行：
+
+```bash
+docker build -t lab-inventory:latest .
+```
+
+#### 9.4.2 直接运行容器
+
+```bash
+docker run -d \
+  --name lab-inventory \
+  -p 8000:8000 \
+  -e SECRET_KEY=please-change-this-key \
+  -e PAGE_SIZE=10 \
+  -v /drv2/mysql_docker/bubble:/app/data \
+  --restart unless-stopped \
+  lab-inventory:latest
+```
+
+说明：
+
+- `-p 8000:8000`：把容器 8000 端口映射到宿主机 8000 端口
+- `-v /drv2/mysql_docker/bubble:/app/data`：把 Debian 宿主机的 `/drv2/mysql_docker/bubble` 挂载到容器内，确保 SQLite 数据持久化
+- `--restart unless-stopped`：宿主机重启后自动拉起容器
+
+启动后访问：
+
+```text
+http://宿主机IP:8000
+```
+
+#### 9.4.3 使用 Docker Compose
+
+项目已经提供：
+
+```text
+docker-compose.yml
+```
+
+在 Debian 上推荐直接用：
+
+```bash
+mkdir -p /drv2/mysql_docker/bubble
+docker compose up -d --build
+```
+
+查看运行状态：
+
+```bash
+docker compose ps
+```
+
+查看日志：
+
+```bash
+docker compose logs -f
+```
+
+停止容器：
+
+```bash
+docker compose down
+```
+
+#### 9.4.4 Debian 上的推荐方式
+
+如果你的目标机器是 Debian，建议流程如下：
+
+1. 安装 Docker Engine 和 Docker Compose 插件
+2. 把整个项目目录复制到 Debian
+3. 进入项目目录
+4. 执行 `docker compose up -d --build`
+5. 用浏览器访问 `http://Debian机器IP:8000`
+
+这样宿主机只需要安装 Docker，不需要再单独维护 Python 运行环境。
+默认情况下，SQLite 数据库文件会写入：
+
+```text
+/drv2/mysql_docker/bubble/lab_inventory.db
+```
+
 ## 10. 备份说明
 
 当前版本默认使用 SQLite，备份最简单的方法就是备份数据库文件。
@@ -312,10 +409,24 @@ sudo journalctl -u lab-inventory -f
 data/lab_inventory.db
 ```
 
+如果你使用 Docker 或 Docker Compose，并且按当前配置挂载了 Debian 宿主机目录，那么数据库文件位置会变成：
+
+```text
+/drv2/mysql_docker/bubble/lab_inventory.db
+```
+
+此时备份方式改为直接备份宿主机这个文件。
+
 ### 10.1 手动备份
 
 ```bash
 cp data/lab_inventory.db data/lab_inventory_backup_$(date +%F).db
+```
+
+如果你使用 Docker 挂载 `/drv2/closelist`，则使用：
+
+```bash
+cp /drv2/mysql_docker/bubble/lab_inventory.db /drv2/mysql_docker/bubble/lab_inventory_backup_$(date +%F).db
 ```
 
 ### 10.2 恢复备份
@@ -327,6 +438,12 @@ cp data/lab_inventory_backup_2026-03-21.db data/lab_inventory.db
 ```
 
 然后重新启动服务。
+
+如果你使用 Docker 挂载 `/drv2/mysql_docker/bubble`，则恢复方式是：
+
+```bash
+cp /drv2/mysql_docker/bubble/lab_inventory_backup_2026-03-21.db /drv2/mysql_docker/bubble/lab_inventory.db
+```
 
 ## 11. 迁移到另一台 Linux 电脑
 
@@ -349,6 +466,14 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 只要 `data/lab_inventory.db` 一起带过去，原有器件数据就不会丢失。
+
+如果你使用 Docker 迁移到另一台 Debian 电脑，流程更简单：
+
+1. 复制整个项目目录
+2. 确认 `data/lab_inventory.db` 已复制
+3. 在新机器执行 `docker compose up -d --build`
+
+这样容器会重新构建，但数据库文件会继续沿用原有数据。
 
 ## 12. 配置说明
 
