@@ -1,3 +1,7 @@
+cd D:\Users\bubble\桌面\LAB
+.\.venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+
 手把手部署
 以下假设你的项目要放在 Debian 的 /opt/lab-inventory。
 

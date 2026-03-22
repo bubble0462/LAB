@@ -28,6 +28,38 @@
     </div>
 </section>
 
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>快速概览</h3>
+            <p>先看核心识别信息，再进入详细字段，适合日常快速确认和认真核对两种场景。</p>
+        </div>
+    </div>
+
+    <div class="glance-grid">
+        <div class="glance-card">
+            <span class="glance-label">型号</span>
+            <strong class="glance-value mono-text">{{ item.model }}</strong>
+            <small class="glance-meta">用于精确区分不同批次或不同型号</small>
+        </div>
+        <div class="glance-card">
+            <span class="glance-label">类别</span>
+            <strong class="glance-value">{{ item.category.name }}</strong>
+            <small class="glance-meta">保持检索、筛选和归档的一致性</small>
+        </div>
+        <div class="glance-card">
+            <span class="glance-label">存放位置</span>
+            <strong class="glance-value">{{ item.location or "未填写" }}</strong>
+            <small class="glance-meta">建议与线下标签或柜位命名保持一致</small>
+        </div>
+        <div class="glance-card">
+            <span class="glance-label">最近更新</span>
+            <strong class="glance-value">{{ item.updated_at.strftime("%Y-%m-%d") }}</strong>
+            <small class="glance-meta">{{ item.updated_at.strftime("%H:%M") }} 写入系统</small>
+        </div>
+    </div>
+</section>
+
 <div class="detail-layout">
     <section class="surface">
         <div class="surface-header">
@@ -44,7 +76,7 @@
             </div>
             <div>
                 <dt>型号</dt>
-                <dd>{{ item.model }}</dd>
+                <dd><span class="mono-text">{{ item.model }}</span></dd>
             </div>
             <div>
                 <dt>类别</dt>

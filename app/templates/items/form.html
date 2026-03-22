@@ -16,6 +16,32 @@
     </div>
 </section>
 
+<section class="surface">
+    <div class="form-steps">
+        <div class="form-step">
+            <span class="form-step-number">1</span>
+            <div class="form-step-body">
+                <strong>基础资料</strong>
+                <p>先明确名称、型号、分类、数量和库位。</p>
+            </div>
+        </div>
+        <div class="form-step">
+            <span class="form-step-number">2</span>
+            <div class="form-step-body">
+                <strong>补充说明</strong>
+                <p>补全参数、功能、备注，方便后续共享与复用。</p>
+            </div>
+        </div>
+        <div class="form-step">
+            <span class="form-step-number">3</span>
+            <div class="form-step-body">
+                <strong>保存确认</strong>
+                <p>提交前快速核对关键字段，减少二次修改。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% if not categories %}
     <div class="alert alert-warning">
         当前还没有任何分类，请先去 <a href="{{ request.url_for('category_new') }}">新增分类</a>，再回来录入器件。
@@ -116,6 +142,12 @@
                     <li>存放位置建议采用固定格式，方便线下查找。</li>
                     <li>关键指标和功能说明越清晰，后续协作越顺畅。</li>
                 </ul>
+
+                <div class="mini-info">
+                    <span>录入完成标准</span>
+                    <strong>可识别、可查找、可复用</strong>
+                    <small>至少保证列表页能快速判断“这是什么、在哪里、有多少”。</small>
+                </div>
 
                 {% if item %}
                     <div class="mini-info">

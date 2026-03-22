@@ -6,6 +6,11 @@
         <span class="eyebrow">核心工作台</span>
         <h2>器件列表</h2>
         <p>统一查看实验室现有器件，保持搜索、筛选、查看和维护的路径足够直接。</p>
+        <div class="hero-meta-row">
+            <span class="meta-badge">默认排序：最近更新</span>
+            <span class="meta-badge">局域网共享：同一份实时数据</span>
+            <span class="meta-badge">当前视图：器件总览</span>
+        </div>
         {% if search_keyword or selected_category_id %}
             <div class="filter-summary">
                 {% if search_keyword %}
@@ -47,6 +52,7 @@
             <p>优先保留常用检索动作，减少查找路径和视觉干扰。</p>
         </div>
         <div class="toolbar-actions">
+            <a href="{{ request.url_for('category_list') }}" class="btn btn-secondary">分类管理</a>
             <a href="{{ request.url_for('item_new') }}" class="btn btn-primary">新增器件</a>
         </div>
     </div>

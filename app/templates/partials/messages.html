@@ -1,14 +1,27 @@
 {% if flash %}
-    <div class="alert alert-{{ flash.level }}">{{ flash.message }}</div>
+    <div class="alert alert-{{ flash.level }}" role="status" aria-live="polite">
+        <div class="alert-sign">
+            {% if flash.level == "success" %}成功{% elif flash.level == "warning" %}提示{% else %}信息{% endif %}
+        </div>
+        <div class="alert-body">
+            <strong>
+                {% if flash.level == "success" %}操作已完成{% elif flash.level == "warning" %}请留意{% else %}状态提示{% endif %}
+            </strong>
+            <p>{{ flash.message }}</p>
+        </div>
+    </div>
 {% endif %}
 
 {% if errors %}
-    <div class="alert alert-danger">
-        <strong>请先修正以下问题</strong>
-        <ul class="error-list">
-            {% for error in errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+    <div class="alert alert-danger" role="alert">
+        <div class="alert-sign">错误</div>
+        <div class="alert-body">
+            <strong>请先修正以下问题</strong>
+            <ul class="error-list">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 {% endif %}

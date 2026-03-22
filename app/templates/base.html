@@ -4,9 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title or app_title }}</title>
+    <script>
+        (function () {
+            var root = document.documentElement;
+            root.classList.add("js");
+            try {
+                if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    root.classList.add("motion-safe");
+                }
+            } catch (error) {
+                root.classList.add("motion-safe");
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
+    <script src="{{ request.url_for('static', path='js/app.js') }}" defer></script>
 </head>
-<body>
+<body class="app-page app-section-{{ section or 'default' }}">
     {% set section_name = "器件管理" if section == "items" else "分类目录" if section == "categories" else "实验室内部系统" %}
 
     <div class="app-shell">
@@ -49,7 +63,6 @@
                     <span class="workspace-kicker">{{ section_name }}</span>
                     <p>保持信息层级清晰、操作顺手、页面长期可维护。</p>
                 </div>
-                <div class="workspace-pill">局域网共享 / 数据实时写入</div>
             </header>
 
             {% include "partials/messages.html" %}
