@@ -68,12 +68,14 @@ def parse_positive_int(value: str | None, default: int | None = None) -> int | N
     return parsed if parsed >= 0 else default
 
 
-def build_filter_query(search_keyword: str, category_id: int | None) -> str:
+def build_filter_query(search_keyword: str, category_id: int | None, page_size: int) -> str:
     params = {}
     if search_keyword.strip():
         params["q"] = search_keyword.strip()
     if category_id is not None:
         params["category_id"] = category_id
+    if page_size > 0:
+        params["page_size"] = page_size
     return urlencode(params)
 
 
@@ -199,20 +201,25 @@ def item_list(
     q: str = "",
     category_id: str | None = None,
     page: str = "1",
+    page_size: str | None = None,
     session: Session = Depends(get_db_session),
 ) -> HTMLResponse:
+    page_size_options = [10, 20, 50, 100]
     parsed_category_id = parse_positive_int(category_id)
     parsed_page = parse_positive_int(page, default=1) or 1
+    parsed_page_size = parse_positive_int(page_size, default=settings.default_page_size) or settings.default_page_size
+    if parsed_page_size not in page_size_options:
+        parsed_page_size = settings.default_page_size
 
     pagination = item_service.list_items(
         session,
         search_keyword=q,
         category_id=parsed_category_id,
         page=parsed_page,
-        page_size=settings.default_page_size,
+        page_size=parsed_page_size,
     )
     categories = category_service.list_categories(session)
-    filter_query = build_filter_query(q, parsed_category_id)
+    filter_query = build_filter_query(q, parsed_category_id, parsed_page_size)
 
     return render_page(
         request,
@@ -226,6 +233,7 @@ def item_list(
             "selected_category_id": parsed_category_id,
             "pagination": pagination,
             "filter_query": filter_query,
+            "page_size_options": page_size_options,
         },
     )
 

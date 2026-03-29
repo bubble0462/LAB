@@ -27,17 +27,17 @@
         {% endif %}
     </div>
     <div class="hero-stats">
-        <div class="stat-card">
+        <div class="stat-card stat-card-soft">
             <span>筛选结果</span>
             <strong>{{ pagination.total }}</strong>
             <small>当前可见器件</small>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-soft">
             <span>分类数量</span>
             <strong>{{ categories|length }}</strong>
             <small>支持持续扩展</small>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-soft">
             <span>页码位置</span>
             <strong>{{ pagination.page }}/{{ pagination.total_pages }}</strong>
             <small>每页 {{ pagination.page_size }} 条</small>
@@ -128,33 +128,33 @@
                             </td>
                             <td data-label="型号与指标">
                                 <div class="stacked-text">
-                                    <strong class="mono-text">{{ item.model }}</strong>
-                                    <span class="clamp-2">{{ item.key_specifications or "未补充关键指标" }}</span>
+                                    <strong class="mono-text" title="{{ item.model }}">{{ item.model }}</strong>
+                                    <span class="clamp-2" title="{{ item.key_specifications or '未补充关键指标' }}">{{ item.key_specifications or "未补充关键指标" }}</span>
                                 </div>
                             </td>
                             <td class="cell-mobile-hidden" data-label="类别">
                                 <span class="tag tag-outline">{{ item.category.name }}</span>
                             </td>
                             <td class="cell-mobile-hidden" data-label="数量">
-                                <span class="quantity-badge">{{ item.quantity }}</span>
+                                <span class="quantity-badge {% if item.quantity == 0 %}quantity-badge-empty{% elif item.quantity <= 2 %}quantity-badge-low{% elif item.quantity <= 5 %}quantity-badge-medium{% else %}quantity-badge-good{% endif %}">{{ item.quantity }}</span>
                             </td>
                             <td data-label="存放位置">
                                 <div class="stacked-text">
-                                    <strong>{{ item.location or "未填写" }}</strong>
+                                    <strong title="{{ item.location or '未填写' }}">{{ item.location or "未填写" }}</strong>
                                     <span class="clamp-1">建议保持库位描述清晰一致</span>
                                 </div>
                             </td>
                             <td data-label="功能与备注">
                                 <div class="stacked-text">
-                                    <strong class="clamp-2">{{ item.function_description or "未补充功能说明" }}</strong>
-                                    <span class="clamp-2">{{ item.remarks or "暂无备注" }}</span>
+                                    <strong class="clamp-2" title="{{ item.function_description or '未补充功能说明' }}">{{ item.function_description or "未补充功能说明" }}</strong>
+                                    <span class="clamp-2" title="{{ item.remarks or '暂无备注' }}">{{ item.remarks or "暂无备注" }}</span>
                                 </div>
                             </td>
                             <td class="actions-cell cell-actions" data-label="操作">
-                                <a href="{{ request.url_for('item_detail', item_id=item.id) }}" class="btn btn-secondary btn-small">查看</a>
+                                <a href="{{ request.url_for('item_detail', item_id=item.id) }}" class="btn btn-light btn-small">查看</a>
                                 <a href="{{ request.url_for('item_edit_page', item_id=item.id) }}" class="btn btn-secondary btn-small">编辑</a>
                                 <form method="post" action="{{ request.url_for('item_delete', item_id=item.id) }}" onsubmit="return confirm('确认删除该器件吗？');">
-                                    <button type="submit" class="btn btn-danger-soft btn-small">删除</button>
+                                    <button type="submit" class="btn btn-danger-text btn-small">删除</button>
                                 </form>
                             </td>
                         </tr>
@@ -164,6 +164,20 @@
         </div>
 
         <div class="pagination-bar">
+            <form method="get" action="{{ request.url_for('item_list') }}" class="page-size-form">
+                {% if search_keyword %}
+                    <input type="hidden" name="q" value="{{ search_keyword }}">
+                {% endif %}
+                {% if selected_category_id %}
+                    <input type="hidden" name="category_id" value="{{ selected_category_id }}">
+                {% endif %}
+                <label for="page_size" class="page-size-label">每页显示</label>
+                <select id="page_size" name="page_size" onchange="this.form.submit()">
+                    {% for option in page_size_options %}
+                        <option value="{{ option }}" {% if pagination.page_size == option %}selected{% endif %}>{{ option }} 条</option>
+                    {% endfor %}
+                </select>
+            </form>
             <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page=1{% if filter_query %}&{{ filter_query }}{% endif %}">首页</a>
             <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page={{ pagination.page - 1 if pagination.page > 1 else 1 }}{% if filter_query %}&{{ filter_query }}{% endif %}">上一页</a>
             <span class="page-status">第 {{ pagination.page }} / {{ pagination.total_pages }} 页</span>

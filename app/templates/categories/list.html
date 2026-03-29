@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero-card">
+<section class="hero-card hero-card-compact">
     <div class="hero-main">
         <span class="eyebrow">目录维护</span>
         <h2>分类管理</h2>
@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="hero-stats">
-        <div class="stat-card">
+        <div class="stat-card stat-card-soft stat-card-compact">
             <span>分类总数</span>
             <strong>{{ categories|length }}</strong>
             <small>支持持续增加</small>
@@ -66,12 +66,12 @@
                                 </div>
                             </td>
                             <td class="cell-mobile-hidden" data-label="器件数量">
-                                <span class="quantity-badge">{{ row.item_count }}</span>
+                                <span class="quantity-badge {% if row.item_count == 0 %}quantity-badge-empty{% elif row.item_count <= 2 %}quantity-badge-low{% elif row.item_count <= 5 %}quantity-badge-medium{% else %}quantity-badge-good{% endif %}">{{ row.item_count }}</span>
                             </td>
                             <td class="actions-cell cell-actions" data-label="操作">
                                 <a href="{{ request.url_for('category_edit_page', category_id=row.category.id) }}" class="btn btn-secondary btn-small">编辑</a>
                                 <form method="post" action="{{ request.url_for('category_delete', category_id=row.category.id) }}" onsubmit="return confirm('确认删除该分类吗？');">
-                                    <button type="submit" class="btn btn-danger-soft btn-small" {% if row.item_count > 0 %}disabled title="该分类下仍有器件，不能删除"{% endif %}>删除</button>
+                                    <button type="submit" class="btn btn-danger-text btn-small" {% if row.item_count > 0 %}disabled title="该分类下仍有器件，不能删除"{% endif %}>删除</button>
                                 </form>
                             </td>
                         </tr>
