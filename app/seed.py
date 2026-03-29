@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from datetime import date
+from decimal import Decimal
+
 from sqlalchemy import select
 
 from app.database import Base, SessionLocal, engine
-from app.models import Category, Item
+from app.models import Category, InvoiceRecord, Item
 
 
 DEMO_CATEGORIES = [
@@ -78,6 +81,76 @@ DEMO_ITEMS = [
 ]
 
 
+DEMO_INVOICES = [
+    {
+        "product_name": "Arduino Uno R3",
+        "model": "A000066",
+        "unit_price": Decimal("98.00"),
+        "quantity": 4,
+        "purchase_date": date(2026, 1, 18),
+        "owner_name": "实验室公共采购",
+        "invoice_status": "已开",
+        "ownership_type": "公共",
+        "remarks": "用于课程演示与基础控制实验",
+    },
+    {
+        "product_name": "ESP32 开发板",
+        "model": "ESP32-WROOM-32",
+        "unit_price": Decimal("36.50"),
+        "quantity": 6,
+        "purchase_date": date(2026, 2, 6),
+        "owner_name": "张同学",
+        "invoice_status": "待开",
+        "ownership_type": "私人",
+        "remarks": "个人课题采购，后续可转为共享库存",
+    },
+    {
+        "product_name": "超声波测距模块",
+        "model": "HC-SR04",
+        "unit_price": Decimal("8.80"),
+        "quantity": 10,
+        "purchase_date": date(2025, 12, 22),
+        "owner_name": "实验室公共采购",
+        "invoice_status": "已开",
+        "ownership_type": "公共",
+        "remarks": "机器人课程实验耗材",
+    },
+    {
+        "product_name": "可调降压模块",
+        "model": "LM2596",
+        "unit_price": Decimal("12.60"),
+        "quantity": 12,
+        "purchase_date": date(2026, 3, 2),
+        "owner_name": "李老师",
+        "invoice_status": "待开",
+        "ownership_type": "公共",
+        "remarks": "统一采购，等待财务开票",
+    },
+    {
+        "product_name": "数字示波器探头",
+        "model": "P6100",
+        "unit_price": Decimal("45.00"),
+        "quantity": 2,
+        "purchase_date": date(2025, 11, 30),
+        "owner_name": "实验室公共采购",
+        "invoice_status": "已开",
+        "ownership_type": "公共",
+        "remarks": "仪器配件补购",
+    },
+    {
+        "product_name": "焊台替换烙铁头",
+        "model": "900M-T-I",
+        "unit_price": Decimal("6.50"),
+        "quantity": 8,
+        "purchase_date": date(2026, 1, 9),
+        "owner_name": "王同学",
+        "invoice_status": "待开",
+        "ownership_type": "私人",
+        "remarks": "个人毕设用，保留报销记录",
+    },
+]
+
+
 def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
 
@@ -86,33 +159,58 @@ def seed_demo_data() -> bool:
     with SessionLocal() as session:
         has_category = session.scalar(select(Category.id).limit(1)) is not None
         has_item = session.scalar(select(Item.id).limit(1)) is not None
-        if has_category or has_item:
-            return False
+        has_invoice = session.scalar(select(InvoiceRecord.id).limit(1)) is not None
 
-        categories = [Category(**category_data) for category_data in DEMO_CATEGORIES]
-        session.add_all(categories)
-        session.flush()
+        created_any = False
 
-        category_map = {category.name: category for category in categories}
-        items = []
-        for item_data in DEMO_ITEMS:
-            category = category_map[item_data["category_name"]]
-            items.append(
-                Item(
-                    name=item_data["name"],
-                    model=item_data["model"],
-                    category_id=category.id,
-                    quantity=item_data["quantity"],
-                    key_specifications=item_data["key_specifications"],
-                    function_description=item_data["function_description"],
-                    remarks=item_data["remarks"],
-                    location=item_data["location"],
+        if not has_category and not has_item:
+            categories = [Category(**category_data) for category_data in DEMO_CATEGORIES]
+            session.add_all(categories)
+            session.flush()
+
+            category_map = {category.name: category for category in categories}
+            items = []
+            for item_data in DEMO_ITEMS:
+                category = category_map[item_data["category_name"]]
+                items.append(
+                    Item(
+                        name=item_data["name"],
+                        model=item_data["model"],
+                        category_id=category.id,
+                        quantity=item_data["quantity"],
+                        key_specifications=item_data["key_specifications"],
+                        function_description=item_data["function_description"],
+                        remarks=item_data["remarks"],
+                        location=item_data["location"],
+                    )
                 )
-            )
 
-        session.add_all(items)
-        session.commit()
-        return True
+            session.add_all(items)
+            created_any = True
+
+        if not has_invoice:
+            invoices = []
+            for invoice_data in DEMO_INVOICES:
+                invoices.append(
+                    InvoiceRecord(
+                        product_name=invoice_data["product_name"],
+                        model=invoice_data["model"],
+                        unit_price=invoice_data["unit_price"],
+                        quantity=invoice_data["quantity"],
+                        total_amount=invoice_data["unit_price"] * invoice_data["quantity"],
+                        purchase_date=invoice_data["purchase_date"],
+                        owner_name=invoice_data["owner_name"],
+                        invoice_status=invoice_data["invoice_status"],
+                        ownership_type=invoice_data["ownership_type"],
+                        remarks=invoice_data["remarks"],
+                    )
+                )
+            session.add_all(invoices)
+            created_any = True
+
+        if created_any:
+            session.commit()
+        return created_any
 
 
 def initialize_database(with_demo_data: bool = True) -> None:
@@ -124,4 +222,3 @@ def initialize_database(with_demo_data: bool = True) -> None:
 if __name__ == "__main__":
     initialize_database(with_demo_data=True)
     print("数据库初始化完成。")
-

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-card hero-card-detail">
+    <div class="hero-main">
+        <span class="eyebrow">发票详情</span>
+        <h2>{{ invoice.product_name }}</h2>
+        <p>{{ invoice.remarks or "查看这条采购发票的金额、归属、状态和购买日期，确保报销与归档记录一致。" }}</p>
+        <div class="filter-summary">
+            <span class="tag tag-accent">{{ invoice.invoice_status }}</span>
+            <span class="tag tag-muted">型号：{{ invoice.model }}</span>
+            <span class="tag tag-muted">归属：{{ invoice.ownership_type }}</span>
+        </div>
+    </div>
+    <div class="hero-side">
+        <div class="stat-card stat-card-focus">
+            <span>总价</span>
+            <strong>¥ {{ '%.2f'|format(invoice.total_amount) }}</strong>
+            <small>单价 ¥ {{ '%.2f'|format(invoice.unit_price) }} × {{ invoice.quantity }}</small>
+        </div>
+        <div class="action-cluster action-cluster-vertical">
+            <a href="{{ request.url_for('invoice_list') }}" class="btn btn-secondary">返回列表</a>
+            <a href="{{ request.url_for('invoice_edit_page', invoice_id=invoice.id) }}" class="btn btn-primary">编辑记录</a>
+            <form method="post" action="{{ request.url_for('invoice_delete', invoice_id=invoice.id) }}" onsubmit="return confirm('确认删除该发票记录吗？');">
+                <button type="submit" class="btn btn-danger-text">删除记录</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>快速概览</h3>
+            <p>把金额、数量、日期和归属放在第一屏，方便报销核对与采购回溯。</p>
+        </div>
+    </div>
+
+    <div class="glance-grid">
+        <div class="glance-card">
+            <span class="glance-label">单价</span>
+            <strong class="glance-value">¥ {{ '%.2f'|format(invoice.unit_price) }}</strong>
+            <small class="glance-meta">用于核对单项采购成本</small>
+        </div>
+        <div class="glance-card">
+            <span class="glance-label">数量</span>
+            <strong class="glance-value">{{ invoice.quantity }}</strong>
+            <small class="glance-meta">与采购清单和入库数量保持一致</small>
+        </div>
+        <div class="glance-card">
+            <span class="glance-label">购买日期</span>
+            <strong class="glance-value">{{ invoice.purchase_date.strftime("%Y-%m-%d") }}</strong>
+            <small class="glance-meta">按实际采购日期记录</small>
+        </div>
+        <div class="glance-card">
+            <span class="glance-label">归属者</span>
+            <strong class="glance-value">{{ invoice.owner_name }}</strong>
+            <small class="glance-meta">{{ invoice.ownership_type }} / {{ invoice.invoice_status }}</small>
+        </div>
+    </div>
+</section>
+
+<div class="detail-layout">
+    <section class="surface">
+        <div class="surface-header">
+            <div>
+                <h3>基础字段</h3>
+                <p>保留和列表一致的财务核心字段，便于横向比对。</p>
+            </div>
+        </div>
+
+        <dl class="detail-pairs">
+            <div>
+                <dt>产品名称</dt>
+                <dd>{{ invoice.product_name }}</dd>
+            </div>
+            <div>
+                <dt>型号</dt>
+                <dd><span class="mono-text">{{ invoice.model }}</span></dd>
+            </div>
+            <div>
+                <dt>归属者</dt>
+                <dd>{{ invoice.owner_name }}</dd>
+            </div>
+            <div>
+                <dt>购买日期</dt>
+                <dd>{{ invoice.purchase_date.strftime("%Y-%m-%d") }}</dd>
+            </div>
+            <div>
+                <dt>创建时间</dt>
+                <dd>{{ invoice.created_at.strftime("%Y-%m-%d %H:%M") }}</dd>
+            </div>
+            <div>
+                <dt>最后更新</dt>
+                <dd>{{ invoice.updated_at.strftime("%Y-%m-%d %H:%M") }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="surface">
+        <div class="surface-header">
+            <div>
+                <h3>金额与状态</h3>
+                <p>金额与开票状态分开展示，减少阅读跳转。</p>
+            </div>
+        </div>
+
+        <dl class="detail-pairs">
+            <div>
+                <dt>单价</dt>
+                <dd>¥ {{ '%.2f'|format(invoice.unit_price) }}</dd>
+            </div>
+            <div>
+                <dt>数量</dt>
+                <dd>{{ invoice.quantity }}</dd>
+            </div>
+            <div>
+                <dt>总价</dt>
+                <dd>¥ {{ '%.2f'|format(invoice.total_amount) }}</dd>
+            </div>
+            <div>
+                <dt>发票状态</dt>
+                <dd><span class="status-chip {% if invoice.invoice_status == '已开' %}status-chip-open{% else %}status-chip-pending{% endif %}">{{ invoice.invoice_status }}</span></dd>
+            </div>
+            <div>
+                <dt>归属类型</dt>
+                <dd><span class="ownership-pill {% if invoice.ownership_type == '公共' %}ownership-public{% else %}ownership-private{% endif %}">{{ invoice.ownership_type }}</span></dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="surface surface-full">
+        <div class="surface-header">
+            <div>
+                <h3>备注与说明</h3>
+                <p>记录报销说明、采购背景或需要长期保留的财务备注。</p>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <span class="content-label">备注</span>
+            <p>{{ invoice.remarks or "暂无备注信息" }}</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

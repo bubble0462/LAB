@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-card hero-card-compact">
+    <div class="hero-main">
+        <span class="eyebrow">采购与报销</span>
+        <h2>发票管理</h2>
+        <p>统一记录采购发票、归属和开票状态，方便实验室内部查找、报销和后续归档。</p>
+        <div class="hero-meta-row">
+            <span class="meta-badge">表格保持财务字段优先</span>
+            <span class="meta-badge">支持搜索、筛选与分页</span>
+            <span class="meta-badge">与器件管理共用同一套视觉规范</span>
+        </div>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-card stat-card-soft stat-card-compact">
+            <span>记录总数</span>
+            <strong>{{ summary.records }}</strong>
+            <small>当前筛选范围内的发票记录</small>
+        </div>
+        <div class="stat-card stat-card-soft stat-card-compact">
+            <span>待开发票</span>
+            <strong>{{ summary.pending_count }}</strong>
+            <small>建议优先跟进待开发票项</small>
+        </div>
+        <div class="stat-card stat-card-focus stat-card-compact">
+            <span>累计金额</span>
+            <strong>¥ {{ '%.2f'|format(summary.amount) }}</strong>
+            <small>按当前列表汇总计算</small>
+        </div>
+    </div>
+</section>
+
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>筛选与录入</h3>
+            <p>保留最常用的发票检索动作，避免财务字段被过度包装。</p>
+        </div>
+        <div class="toolbar-actions">
+            <a href="{{ request.url_for('invoice_new') }}" class="btn btn-primary">新增发票</a>
+        </div>
+    </div>
+
+    <form method="get" action="{{ request.url_for('invoice_list') }}" class="invoice-filter-grid">
+        <div class="form-field">
+            <label for="q">关键词搜索</label>
+            <input id="q" type="text" name="q" value="{{ search_keyword }}" placeholder="按产品名称、型号、归属者搜索">
+        </div>
+
+        <div class="form-field">
+            <label for="invoice_status">发票状态</label>
+            <select id="invoice_status" name="invoice_status">
+                {% for option in invoice_status_options %}
+                    {% set option_value = "" if option == "全部状态" else option %}
+                    <option value="{{ option_value }}" {% if (selected_invoice_status or "") == option_value %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="ownership_type">归属类型</label>
+            <select id="ownership_type" name="ownership_type">
+                {% for option in ownership_options %}
+                    {% set option_value = "" if option == "全部归属" else option %}
+                    <option value="{{ option_value }}" {% if (selected_ownership_type or "") == option_value %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a href="{{ request.url_for('invoice_list') }}" class="btn btn-secondary">清空</a>
+        </div>
+    </form>
+</section>
+
+<section class="surface">
+    <div class="surface-header">
+        <div>
+            <h3>发票列表</h3>
+            <p>参考你提供的财务表格样式，优先保证产品名称、型号、金额、日期和归属字段的可扫读性。</p>
+        </div>
+        <div class="meta-inline">
+            <span>共 {{ pagination.total }} 条记录</span>
+            <span>第 {{ pagination.page }} 页</span>
+        </div>
+    </div>
+
+    {% if invoices %}
+        <div class="table-wrap">
+            <table class="data-table invoice-table">
+                <thead>
+                    <tr>
+                        <th>产品名称</th>
+                        <th>型号</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>总价</th>
+                        <th>购买日期</th>
+                        <th>归属者</th>
+                        <th>发票状态</th>
+                        <th>公共/私有</th>
+                        <th class="actions-col">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                        <tr>
+                            <td class="cell-primary" data-label="产品名称">
+                                <div class="entity-block">
+                                    <div class="entity-name-row">
+                                        <div class="entity-name">{{ invoice.product_name }}</div>
+                                    </div>
+                                    <div class="entity-inline-meta">
+                                        <span class="entity-meta">记录 ID {{ invoice.id }}</span>
+                                        <span class="entity-meta">更新于 {{ invoice.updated_at.strftime("%m-%d %H:%M") }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="型号">
+                                <div class="stacked-text">
+                                    <strong class="mono-text" title="{{ invoice.model }}">{{ invoice.model }}</strong>
+                                    <span class="clamp-1">{{ invoice.remarks or "暂无备注" }}</span>
+                                </div>
+                            </td>
+                            <td data-label="单价">
+                                <strong class="currency-text">¥ {{ '%.2f'|format(invoice.unit_price) }}</strong>
+                            </td>
+                            <td data-label="数量">
+                                <span class="quantity-badge {% if invoice.quantity <= 1 %}quantity-badge-low{% elif invoice.quantity <= 5 %}quantity-badge-medium{% else %}quantity-badge-good{% endif %}">{{ invoice.quantity }}</span>
+                            </td>
+                            <td data-label="总价">
+                                <strong class="currency-text currency-text-strong">¥ {{ '%.2f'|format(invoice.total_amount) }}</strong>
+                            </td>
+                            <td data-label="购买日期">
+                                <div class="stacked-text">
+                                    <strong>{{ invoice.purchase_date.strftime("%Y-%m-%d") }}</strong>
+                                    <span>{{ invoice.created_at.strftime("%H:%M") }} 录入</span>
+                                </div>
+                            </td>
+                            <td data-label="归属者">
+                                <span title="{{ invoice.owner_name }}">{{ invoice.owner_name }}</span>
+                            </td>
+                            <td data-label="发票状态">
+                                <span class="status-chip {% if invoice.invoice_status == '已开' %}status-chip-open{% else %}status-chip-pending{% endif %}">{{ invoice.invoice_status }}</span>
+                            </td>
+                            <td data-label="公共/私有">
+                                <span class="ownership-pill {% if invoice.ownership_type == '公共' %}ownership-public{% else %}ownership-private{% endif %}">{{ invoice.ownership_type }}</span>
+                            </td>
+                            <td class="actions-cell cell-actions" data-label="操作">
+                                <a href="{{ request.url_for('invoice_detail', invoice_id=invoice.id) }}" class="btn btn-light btn-small">查看</a>
+                                <a href="{{ request.url_for('invoice_edit_page', invoice_id=invoice.id) }}" class="btn btn-secondary btn-small">编辑</a>
+                                <form method="post" action="{{ request.url_for('invoice_delete', invoice_id=invoice.id) }}" onsubmit="return confirm('确认删除该发票记录吗？');">
+                                    <button type="submit" class="btn btn-danger-text btn-small">删除</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="invoice-summary-strip">
+            <div class="invoice-summary-item">
+                <span>总计项目</span>
+                <strong>{{ summary.records }}</strong>
+            </div>
+            <div class="invoice-summary-item">
+                <span>总计数量</span>
+                <strong>{{ summary.quantity }}</strong>
+            </div>
+            <div class="invoice-summary-item">
+                <span>总金额</span>
+                <strong>¥ {{ '%.2f'|format(summary.amount) }}</strong>
+            </div>
+        </div>
+
+        <div class="pagination-bar">
+            <form method="get" action="{{ request.url_for('invoice_list') }}" class="page-size-form">
+                {% if search_keyword %}
+                    <input type="hidden" name="q" value="{{ search_keyword }}">
+                {% endif %}
+                {% if selected_invoice_status %}
+                    <input type="hidden" name="invoice_status" value="{{ selected_invoice_status }}">
+                {% endif %}
+                {% if selected_ownership_type %}
+                    <input type="hidden" name="ownership_type" value="{{ selected_ownership_type }}">
+                {% endif %}
+                <label for="page_size" class="page-size-label">每页显示</label>
+                <select id="page_size" name="page_size" onchange="this.form.submit()">
+                    {% for option in page_size_options %}
+                        <option value="{{ option }}" {% if pagination.page_size == option %}selected{% endif %}>{{ option }} 条</option>
+                    {% endfor %}
+                </select>
+            </form>
+            <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page=1{% if filter_query %}&{{ filter_query }}{% endif %}">首页</a>
+            <a class="page-link {% if pagination.page <= 1 %}disabled{% endif %}" href="?page={{ pagination.page - 1 if pagination.page > 1 else 1 }}{% if filter_query %}&{{ filter_query }}{% endif %}">上一页</a>
+            <span class="page-status">第 {{ pagination.page }} / {{ pagination.total_pages }} 页</span>
+            <a class="page-link {% if pagination.page >= pagination.total_pages %}disabled{% endif %}" href="?page={{ pagination.page + 1 if pagination.page < pagination.total_pages else pagination.total_pages }}{% if filter_query %}&{{ filter_query }}{% endif %}">下一页</a>
+            <a class="page-link {% if pagination.page >= pagination.total_pages %}disabled{% endif %}" href="?page={{ pagination.total_pages }}{% if filter_query %}&{{ filter_query }}{% endif %}">末页</a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-mark">INV</div>
+            <h3>当前没有符合条件的发票记录</h3>
+            <p>可以先放宽筛选条件，或者直接新增一条采购发票记录。</p>
+            <div class="toolbar-actions">
+                <a href="{{ request.url_for('invoice_list') }}" class="btn btn-secondary">查看全部</a>
+                <a href="{{ request.url_for('invoice_new') }}" class="btn btn-primary">新增发票</a>
+            </div>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

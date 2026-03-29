@@ -21,7 +21,7 @@
     <script src="{{ request.url_for('static', path='js/app.js') }}" defer></script>
 </head>
 <body class="app-page app-section-{{ section or 'default' }}">
-    {% set section_name = "器件管理" if section == "items" else "分类目录" if section == "categories" else "实验室内部系统" %}
+    {% set section_name = "器件管理" if section == "items" else "分类目录" if section == "categories" else "发票管理" if section == "invoices" else "实验室内部系统" %}
 
     <div class="app-shell">
         <aside class="sidebar">
@@ -43,6 +43,10 @@
                     <a href="{{ request.url_for('category_list') }}" class="{% if section == 'categories' %}active{% endif %}">
                         <span class="nav-label">分类管理</span>
                         <span class="nav-meta">扩展目录</span>
+                    </a>
+                    <a href="{{ request.url_for('invoice_list') }}" class="{% if section == 'invoices' %}active{% endif %}">
+                        <span class="nav-label">发票管理</span>
+                        <span class="nav-meta">采购与报销记录</span>
                     </a>
                 </nav>
 

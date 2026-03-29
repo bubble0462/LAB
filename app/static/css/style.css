@@ -413,6 +413,13 @@ textarea:focus-visible {
     align-items: end;
 }
 
+.invoice-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.4fr) repeat(2, minmax(180px, 0.8fr)) auto;
+    gap: 16px;
+    align-items: end;
+}
+
 .support-grid,
 .glance-grid,
 .form-steps,
@@ -704,6 +711,22 @@ textarea::placeholder { color: #97a3b3; }
     table-layout: fixed;
 }
 
+.invoice-table {
+    min-width: 1320px;
+    table-layout: fixed;
+}
+
+.invoice-table th:nth-child(1) { width: 16%; }
+.invoice-table th:nth-child(2) { width: 12%; }
+.invoice-table th:nth-child(3) { width: 8%; }
+.invoice-table th:nth-child(4) { width: 7%; }
+.invoice-table th:nth-child(5) { width: 10%; }
+.invoice-table th:nth-child(6) { width: 11%; }
+.invoice-table th:nth-child(7) { width: 10%; }
+.invoice-table th:nth-child(8) { width: 8%; }
+.invoice-table th:nth-child(9) { width: 10%; }
+.invoice-table th:nth-child(10) { width: 8%; }
+
 .category-table th:nth-child(1) { width: 28%; }
 .category-table th:nth-child(2) { width: 42%; }
 .category-table th:nth-child(3) { width: 12%; }
@@ -785,6 +808,16 @@ textarea::placeholder { color: #97a3b3; }
 .stacked-text strong { color: var(--text); font-size: 14px; line-height: 1.5; }
 .stacked-text span { color: var(--text-soft); font-size: 13px; line-height: 1.65; }
 .mono-text { font-family: Consolas, "SFMono-Regular", "Cascadia Code", monospace; }
+.currency-text {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.currency-text-strong { font-size: 15px; }
 
 .clamp-1,
 .clamp-2 {
@@ -851,6 +884,44 @@ textarea::placeholder { color: #97a3b3; }
     font-size: 12px;
 }
 
+.status-chip,
+.ownership-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 58px;
+    min-height: 30px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.status-chip-open {
+    color: #17683f;
+    background: rgba(31, 138, 87, 0.14);
+    border-color: rgba(31, 138, 87, 0.16);
+}
+
+.status-chip-pending {
+    color: #9a6315;
+    background: rgba(160, 106, 22, 0.14);
+    border-color: rgba(160, 106, 22, 0.16);
+}
+
+.ownership-public {
+    color: #17683f;
+    background: rgba(31, 138, 87, 0.14);
+    border-color: rgba(31, 138, 87, 0.16);
+}
+
+.ownership-private {
+    color: #9b2f2c;
+    background: rgba(201, 76, 66, 0.12);
+    border-color: rgba(201, 76, 66, 0.16);
+}
+
 .page-size-form {
     display: inline-flex;
     align-items: center;
@@ -869,6 +940,58 @@ textarea::placeholder { color: #97a3b3; }
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
+}
+
+.invoice-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+
+.invoice-summary-item,
+.invoice-total-preview {
+    padding: 16px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(215, 224, 233, 0.92);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 253, 0.96));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.invoice-summary-item span,
+.invoice-total-preview span {
+    display: block;
+    color: var(--text-faint);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.invoice-summary-item strong,
+.invoice-total-preview strong {
+    display: block;
+    margin-top: 10px;
+    color: var(--text);
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.invoice-summary-item:nth-child(3),
+.invoice-total-preview {
+    background: linear-gradient(180deg, rgba(41, 86, 215, 0.08), rgba(255, 255, 255, 0.96));
+    border-color: rgba(41, 86, 215, 0.16);
+}
+
+.invoice-summary-item strong {
+    font-size: 22px;
+}
+
+.invoice-total-preview small {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-soft);
+    font-size: 12px;
 }
 
 .page-link,
@@ -1070,12 +1193,14 @@ textarea::placeholder { color: #97a3b3; }
     .action-strip { flex-direction: column; align-items: flex-start; }
     .workspace-topbar { padding: 4px 0 16px; }
     .filter-grid,
+    .invoice-filter-grid,
     .form-grid,
     .hero-stats { grid-template-columns: 1fr; }
     .table-caption-strip,
     .support-grid,
     .glance-grid,
     .form-steps { grid-template-columns: 1fr; }
+    .invoice-summary-strip { grid-template-columns: 1fr; }
     .detail-pairs div { grid-template-columns: 1fr; gap: 6px; }
 }
 

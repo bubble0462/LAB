@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -44,3 +45,23 @@ class Item(TimestampMixin, Base):
 
     category: Mapped[Category] = relationship(back_populates="items")
 
+
+class InvoiceRecord(TimestampMixin, Base):
+    __tablename__ = "invoice_records"
+    __table_args__ = (
+        CheckConstraint("quantity >= 1", name="ck_invoice_records_quantity_positive"),
+        CheckConstraint("unit_price >= 0", name="ck_invoice_records_unit_price_non_negative"),
+        CheckConstraint("total_amount >= 0", name="ck_invoice_records_total_amount_non_negative"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    product_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    model: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    purchase_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    owner_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    invoice_status: Mapped[str] = mapped_column(String(20), nullable=False, default="待开", index=True)
+    ownership_type: Mapped[str] = mapped_column(String(20), nullable=False, default="公共", index=True)
+    remarks: Mapped[str | None] = mapped_column(Text, nullable=True)
